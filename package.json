@@ -6,7 +6,8 @@
   "module": "./dist/index.mjs",
   "types": "./dist/types/index.d.ts",
   "files": [
-    "dist/*",
+    "dist/*js",
+    "dist/*.map",
     "dist/types/index.d.ts",
     "LICENSE",
     "README.md"
