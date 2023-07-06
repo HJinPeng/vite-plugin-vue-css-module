@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-vue-css-module",
-  "version": "1.0.4",
+  "version": "1.0.3",
   "description": "css-module syntactic sugar for vue3",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -16,7 +16,7 @@
     "dev": "rollup -c -w",
     "build": "rollup -c",
     "format": "prettier --write src/",
-    "publish": "npm version patch && npm publish"
+    "release": "npm version patch && npm publish"
   },
   "keywords": [
     "css-module",
