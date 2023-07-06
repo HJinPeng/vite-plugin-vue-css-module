@@ -1,0 +1,46 @@
+{
+  "name": "vite-plugin-vue-css-module",
+  "version": "1.0.0",
+  "description": "css-module syntactic sugar for vue3",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist/*",
+    "dist/types/index.d.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "rollup -c -w",
+    "build": "rollup -c",
+    "format": "prettier --write src/"
+  },
+  "keywords": [
+    "css-module",
+    "cssModule",
+    "vue3"
+  ],
+  "author": "jinpengh <13143352767@163.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/generator": "^7.22.5",
+    "@babel/parser": "^7.22.5",
+    "@babel/traverse": "^7.22.5",
+    "@babel/types": "^7.22.5",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@types/babel__generator": "^7.6.4",
+    "@types/babel__traverse": "^7.20.1",
+    "eslint": "^8.44.0",
+    "magic-string": "^0.30.0",
+    "prettier": "^2.8.8",
+    "rollup": "^3.25.3",
+    "tslib": "^2.6.0",
+    "typescript": "^5.1.6"
+  },
+  "peerDependencies": {
+    "@vue/compiler-core": "^3.3.4",
+    "@vue/compiler-sfc": "^3.3.4",
+    "vite": "^4.3.9"
+  }
+}
