@@ -22,6 +22,11 @@
     "vue3"
   ],
   "author": "jinpengh <13143352767@163.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HJinPeng/vite-plugin-vue-css-module"
+  },
+  "homepage": "https://github.com/HJinPeng/vite-plugin-vue-css-module#readme",
   "license": "MIT",
   "devDependencies": {
     "@babel/generator": "^7.22.5",
