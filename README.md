@@ -17,7 +17,7 @@ Before using it, you might have written something like:
 </style>
 ```
 
-After using it, you no longer need to repeat the `$style.`, you just need to write this:
+**After using it, you no longer need to repeat the `$style.`, you just need to write this:**
 
 ```html
 <template>
