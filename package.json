@@ -15,7 +15,8 @@
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "publish": "npm version patch && npm publish"
   },
   "keywords": [
     "css-module",
