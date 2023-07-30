@@ -1,24 +1,3 @@
-import { parse } from '@babel/parser'
-import _generate from '@babel/generator'
-import _traverse from '@babel/traverse'
-import {
-  identifier,
-  isIdentifier,
-  isObjectProperty,
-  memberExpression,
-  templateLiteral,
-  templateElement,
-  isStringLiteral,
-  isLogicalExpression,
-  isConditionalExpression,
-  isArrayExpression
-} from '@babel/types'
-
-// https://github.com/babel/babel/issues/13855
-// @ts-ignore
-const traverse = _traverse.default as typeof _traverse
-const generate = (_generate as any).default as typeof _generate
-
 /**
  * 判断是否是 对象表达式 字符串
  * @param code String
@@ -81,120 +60,103 @@ export function transformString2ObjectString(code: string) {
 }
 
 /**
- * 通过 babel 将 表达式中的 类名 转换为 $style[`类名`]
+ * 将 表达式中的 类名 转换为 [cssModuleName][`类名`]，如：$style[`类名`]
  * @param code String
+ * @param cssModuleName 模块名
  * @returns String
  */
-export function transformByBabel(code: string) {
+export function transformExp(code: string, cssModuleName: string) {
   // :[attrName]="{}" :[attrName]='{}'
   if (isObjectExp(code)) {
-    return transformObjectByBabel(code)
+    return transformObject(code, cssModuleName)
   }
   // :[attrName]="[]" :[attrName]='[]'
   else if (isArrayExp(code)) {
-    return transformArrayByBabel(code)
+    return transformArray(code, cssModuleName)
   }
   // :[attrName]="type"  :[attrName]='type === "add" && "red"' :[attrName]="type === 'add' ? 'red' : 'green'"
   else {
-    return transformStringByBabel(code)
+    return transformString(code, cssModuleName)
   }
 }
 
 /**
- * 通过babel转换 将 {} 中的类名换为 $style[`类名`]
+ * 将 {} 中的类名换为 $style[`类名`]
  * @param code String
+ * @param cssModuleName 模块名
  * @returns 转换后去除{}的字符串
  */
-function transformObjectByBabel(code: string) {
-  // 生成抽象语法树
-  const ast = parse(`var s = ${code}`)
-  // 转换 将类名转为 $style[类名]
-  traverse(ast, {
-    exit(path: any) {
-      if (
-        (isIdentifier(path.node) || isStringLiteral(path.node)) &&
-        path.parentPath &&
-        isObjectProperty(path.parentPath.node)
-      ) {
-        path.parentPath.node.computed = true
-        const _val = isIdentifier(path.node) ? path.node.name : path.node.value
-        path.replaceWith(
-          memberExpression(
-            identifier('$style'),
-            templateLiteral([templateElement({ raw: _val })], []),
-            true,
-            false
-          )
-        )
-      }
-    }
-  })
-  // 转换后的字符串
-  let result = generate(ast).code
-  result = result.substring(9, result.length - 2)
+function transformObject(code: string, cssModuleName: string) {
+  const contentArr = getObjectOrArrayExpressionContent(code).split(',')
+  const result = contentArr
+    .map((item) => {
+      const [key, value] = item.split(':')
+      return `[${cssModuleName}[${trimString(key)}]]:${trimString(value)}`
+    })
+    .join(',')
   return result
 }
 
 /**
- * 通过babel转换 将 [] 中的类名换为 $style[`类名`]
+ * 将 [] 中的类名换为 $style[`类名`]
  * @param code String
+ * @param cssModuleName 模块名
  * @returns 转换后去除[]的字符串
  */
-function transformArrayByBabel(code: string) {
-  const ast = parse(code)
-  traverse(ast, {
-    exit(path: any) {
-      if (
-        isStringLiteral(path.node) &&
-        path.node.value &&
-        path.parentPath &&
-        (isLogicalExpression(path.parentPath.node) ||
-          isConditionalExpression(path.parentPath.node) ||
-          isArrayExpression(path.parentPath.node))
-      ) {
-        path.replaceWith(
-          memberExpression(
-            identifier('$style'),
-            templateLiteral([templateElement({ raw: path.node.value })], []),
-            true,
-            false
-          )
-        )
-      }
-    }
-  })
-  let result = generate(ast).code
-  result = result.substring(1, result.length - 2)
+function transformArray(code: string, cssModuleName: string) {
+  const contentArr = getObjectOrArrayExpressionContent(code).split(',')
+  const result = contentArr.map((item) => `${cssModuleName}[${trimString(item)}]`).join(',')
   return result
 }
 
 /**
- * 通过babel转换 将 exp 中的类名换为 $style[`类名`]
+ * 直接将表达式加上模块名
  * @param code String
- * @returns 转换后的字符串
+ * @param cssModuleName 模块名
+ * @returns 表达式外部加上模块名
  */
-function transformStringByBabel(code: string) {
-  const ast = parse(code)
-  traverse(ast, {
-    exit(path: any) {
-      if (
-        isStringLiteral(path.node) &&
-        path.node.value &&
-        path.parentPath &&
-        (isLogicalExpression(path.parentPath.node) || isConditionalExpression(path.parentPath.node))
-      ) {
-        path.replaceWith(
-          memberExpression(
-            identifier('$style'),
-            templateLiteral([templateElement({ raw: path.node.value })], []),
-            true,
-            false
-          )
-        )
-      }
+function transformString(code: string, cssModuleName: string) {
+  return `${cssModuleName}[${code}]`
+}
+
+/**
+ * 判断是否是合法变量名
+ * @param variableName string
+ * @returns boolean
+ */
+export function isLegalVariate(variableName: string) {
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(variableName)
+}
+
+/**
+ * 判断是表达式是单引号还是双引号格式
+ * @param code String
+ * @returns '--单引号  "--双引号
+ */
+export function getQuote(code: string) {
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] === '"') {
+      return '"'
     }
-  })
-  let result = generate(ast).code
-  result = result.substring(0, result.length - 1)
+    if (code[i] === "'") {
+      return "'"
+    }
+  }
+}
+
+/**
+ * 将单引号转为双引号，双引号转为单引号
+ * @param code string
+ * @returns string
+ */
+export function swapQuotes(code: string) {
+  let result: string
+  const placeholder = '__QUOTE__'
+  // 将单引号替换为 __QUOTE__
+  result = code.replace(/'/g, placeholder)
+  // 将双引号替换为单引号
+  result = result.replace(/"/g, "'")
+  // 将占位符替换为双引号
+  result = result.replace(new RegExp(placeholder, 'g'), '"')
   return result
 }

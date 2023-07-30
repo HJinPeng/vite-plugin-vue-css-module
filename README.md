@@ -62,9 +62,13 @@ export default defineConfig({
 })
 ```
 
-Used in the `**.vue` file. Enable css-module in `<style module></style>`, as mentioned on the [vue3](https://cn.vuejs.org/api/sfc-css-features.html#css-modules) website. After that, all you need to do is write the class name on the node in `<template>` as you would with a class, using the `attrName` attribute you set, and it will automatically add `$style.` for you. It automatically handles `attrName` you set in relation to `class` and `:class`.
+Used in the `**.vue` file. Enable css-module with `<style module></style>` or `<style module="moduleName"></style>`, as mentioned on the [vue3](https://cn.vuejs.org/api/sfc-css-features.html#css-modules) website. After that, all you need to do is to write the class name on the node in `<template>` which is the same as writing a class. Using the `attrName` to attribute your set, it will automatically add `$style.` or `moduleName.` for you. It automatically handles `attrName` your set in relation to `class` and `:class`.
 
-Note: This syntax sugar is currently only supported in `<template>`
+
+Note: 
+  - This syntax sugar is currently only supported in `<template>`.
+  - The plugin will only find the first style tag that uses module and then use its name, which defaults to $style. In fact, setting a custom name such as `<style module="moduleName">` does not make sense for this plugin. 
+  - The plugin supports a variety of class name writing, although the writing is not very standardized.
 
 ```html
 <!-- App.vue -->
@@ -73,6 +77,8 @@ Note: This syntax sugar is currently only supported in `<template>`
   <div class="yellow" :class="[ type ]" :cls="['red', type === 'active' ? 'red--active' : 'red--inactive], true && 'red--focus'">vite-plugin-vue-css-module</div>
   <div :cls="{ red: type === 'default' , 'red--active': type === 'active' }">vite-plugin-vue-css-module</div>
   <div :cls="type === 'active' && 'red--active'"></div>
+  <!-- Non-standard writing is also supported -->
+  <div class="yellow" :cls=' [ 1 === 1 ?`${type}--active` : type + "--inactive" ]    '></div>
 </template>
 
 <style module>
@@ -80,6 +86,13 @@ Note: This syntax sugar is currently only supported in `<template>`
     color: red;
   }
   .red--active {
+    color: darkred;
+  }
+</style>
+
+<!-- Does not work, because only the first module will be found -->
+<style module="moduleName">
+  .red {
     color: darkred;
   }
 </style>

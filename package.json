@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-vue-css-module",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "css-module syntactic sugar for vue3",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -38,13 +38,7 @@
   "homepage": "https://github.com/HJinPeng/vite-plugin-vue-css-module#readme",
   "license": "MIT",
   "devDependencies": {
-    "@babel/generator": "^7.22.5",
-    "@babel/parser": "^7.22.5",
-    "@babel/traverse": "^7.22.5",
-    "@babel/types": "^7.22.5",
     "@rollup/plugin-typescript": "^11.1.2",
-    "@types/babel__generator": "^7.6.4",
-    "@types/babel__traverse": "^7.20.1",
     "eslint": "^8.44.0",
     "magic-string": "^0.30.0",
     "prettier": "^2.8.8",
