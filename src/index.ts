@@ -20,7 +20,7 @@ export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): 
     name: 'vite-plugin-vue-css-module',
     enforce: 'pre',
     async transform(code: string, id: string) {
-      if (id.endsWith('.vue') && id.includes('App')) {
+      if (id.endsWith('.vue')) {
         // style标签上有module，表示开启了css-module
         const { cssModule, templateAst } = parseVue2Ast(code)
         if (cssModule) {
