@@ -30,6 +30,14 @@ export default {
   plugins: [
     typescript()
   ],
-  external: ['magic-string', '@vue/compiler-sfc', '@vue/compiler-core', '@babel/parser',  '@babel/types', '@babel/traverse', '@babel/generator', '@babel/traverse/lib/index.js'],
-  
+  external: [
+    'magic-string', 
+    '@vue/compiler-sfc', 
+    '@vue/compiler-core',
+    'pug-parser',
+    'pug-lexer',
+    'pug-walk',
+    'pug-runtime/wrap',
+    'pug-code-gen'
+  ]
 }

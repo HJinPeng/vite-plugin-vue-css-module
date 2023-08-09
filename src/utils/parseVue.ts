@@ -5,12 +5,12 @@ import { parse } from '@vue/compiler-sfc'
  * @param code vue文件
  * @returns Object
  */
-export function parseVue2Ast(code: string) {
+export function parseVue(code: string) {
   const descriptor = parse(code).descriptor
   // 获取 <style module> 或 <style module="blog">的值
   const cssModule = descriptor.styles.find((style) => style.module !== undefined)?.module
   return {
     cssModule,
-    templateAst: descriptor.template?.ast
+    template: descriptor.template
   }
 }

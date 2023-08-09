@@ -1,3 +1,6 @@
+// 引号类型
+type Quote = "'" | '"'
+
 /**
  * 判断是否是 对象表达式 字符串
  * @param code String
@@ -50,6 +53,7 @@ export function transformString2Array(code: string) {
  * @returns String
  */
 export function transformString2ObjectString(code: string) {
+  if (!code) return ''
   return code
     .split(',')
     .map((val) => {
@@ -65,10 +69,10 @@ export function transformString2ObjectString(code: string) {
  * @param cssModuleName 模块名
  * @returns String
  */
-export function transformExp(code: string, cssModuleName: string) {
+export function transformExp(code: string, cssModuleName: string, quote: Quote) {
   // :[attrName]="{}" :[attrName]='{}'
   if (isObjectExp(code)) {
-    return transformObject(code, cssModuleName)
+    return transformObject(code, cssModuleName, quote)
   }
   // :[attrName]="[]" :[attrName]='[]'
   else if (isArrayExp(code)) {
@@ -86,12 +90,18 @@ export function transformExp(code: string, cssModuleName: string) {
  * @param cssModuleName 模块名
  * @returns 转换后去除{}的字符串
  */
-function transformObject(code: string, cssModuleName: string) {
-  const contentArr = getObjectOrArrayExpressionContent(code).split(',')
+function transformObject(code: string, cssModuleName: string, quote: Quote) {
+  const content = getObjectOrArrayExpressionContent(code)
+  if (!content) return ''
+  const contentArr = content.split(',')
   const result = contentArr
     .map((item) => {
       const [key, value] = item.split(':')
-      return `[${cssModuleName}[${trimString(key)}]]:${trimString(value)}`
+      let _key = trimString(key)
+      if (isLegalVariate(_key)) {
+        _key = `${quote}${_key}${quote}`
+      }
+      return `[${cssModuleName}[${_key}]]:${trimString(value)}`
     })
     .join(',')
   return result
@@ -104,7 +114,9 @@ function transformObject(code: string, cssModuleName: string) {
  * @returns 转换后去除[]的字符串
  */
 function transformArray(code: string, cssModuleName: string) {
-  const contentArr = getObjectOrArrayExpressionContent(code).split(',')
+  const content = getObjectOrArrayExpressionContent(code)
+  if (!content) return ''
+  const contentArr = content.split(',')
   const result = contentArr.map((item) => `${cssModuleName}[${trimString(item)}]`).join(',')
   return result
 }
@@ -116,6 +128,7 @@ function transformArray(code: string, cssModuleName: string) {
  * @returns 表达式外部加上模块名
  */
 function transformString(code: string, cssModuleName: string) {
+  if (!code) return ''
   return `${cssModuleName}[${code}]`
 }
 
@@ -131,7 +144,7 @@ export function isLegalVariate(variableName: string) {
 /**
  * 判断是表达式是单引号还是双引号格式
  * @param code String
- * @returns '--单引号  "--双引号
+ * @returns '--单引号  "--双引号 `--模版符号
  */
 export function getQuote(code: string) {
   for (let i = 0; i < code.length; i++) {
@@ -141,7 +154,11 @@ export function getQuote(code: string) {
     if (code[i] === "'") {
       return "'"
     }
+    if (code[i] === '`') {
+      return '`'
+    }
   }
+  return ''
 }
 
 /**
@@ -159,4 +176,23 @@ export function swapQuotes(code: string) {
   // 将占位符替换为双引号
   result = result.replace(new RegExp(placeholder, 'g'), '"')
   return result
+}
+
+/**
+ * 将代码中的双引号改为单引号
+ * @param code string
+ * @returns string
+ */
+export function transform2SingleQuotes(code: string) {
+  return code.replace(/"/g, "'")
+}
+
+/**
+ * 获取pug属性节点的val值，去除前后符号和空格
+ * @param code pug的attrs的节点
+ * @returns string
+ */
+export function getPugVal(code: string | boolean) {
+  if (typeof code === 'boolean') return ''
+  return trimString(code.substring(1, code.length - 1))
 }
