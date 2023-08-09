@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-vue-css-module",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "css-module syntactic sugar for vue3",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -28,7 +28,8 @@
     "class",
     "cls",
     "vue3",
-    "vite"
+    "vite",
+    "pug"
   ],
   "author": "jinpengh <13143352767@163.com>",
   "repository": {
