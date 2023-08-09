@@ -2,7 +2,6 @@ import type {
   AttributeNode,
   DirectiveNode,
   SimpleExpressionNode,
-  TextNode,
   ElementNode
 } from '@vue/compiler-core'
 import MagicString from 'magic-string'
@@ -18,7 +17,7 @@ import {
   swapQuotes
 } from './tool'
 
-export function transformAttrs(
+export function parseHtml(
   childNode: ElementNode[],
   s: MagicString,
   attrName: string,
@@ -37,11 +36,11 @@ export function transformAttrs(
         ) {
           bindClassNode = prop as DirectiveNode
         }
-        // if attrName = cls, then cls=""
+        // 如果 attrName = cls, 则是 cls=""
         else if (prop.name === attrName) {
           attrNameNode = prop as AttributeNode
         }
-        // if attrName = cls, then :cls=""
+        // 如果 attrName = cls, 则是 :cls=""
         else if (
           prop.name === 'bind' &&
           ((prop as DirectiveNode).arg as SimpleExpressionNode).content === attrName
@@ -49,9 +48,9 @@ export function transformAttrs(
           bindAttrNameNode = prop as DirectiveNode
         }
       })
-      // if attrName = cls, and :cls="" exist
+      // 如果 attrName = cls, 且 :cls="" 存在
       if (bindAttrNameNode) {
-        // :cls='' -> '   :cls="" -> "
+        // 返回表达式的引号 :cls='' -> '   :cls="" -> "
         const bindAttrNameQuote = getQuote(bindAttrNameNode.loc.source)
         const bindAttrNameContent = trimString(
           (bindAttrNameNode.exp as SimpleExpressionNode).content
@@ -59,9 +58,13 @@ export function transformAttrs(
         // 将:cls=""中的类名加上cssModuleName.
         let bindAttrNameContent2CssModuleNameStr: string = transformExp(
           bindAttrNameContent,
-          cssModuleName
+          cssModuleName,
+          bindAttrNameQuote === "'" ? '"' : "'"
         )
-        if (!bindAttrNameContent2CssModuleNameStr) return
+        if (!bindAttrNameContent2CssModuleNameStr) {
+          s.update(bindAttrNameNode.loc.start.offset, bindAttrNameNode.loc.end.offset, '')
+          return
+        }
         // :class exist
         if (bindClassNode) {
           const bindClassQuote = getQuote(bindClassNode.loc.source)
@@ -74,14 +77,18 @@ export function transformAttrs(
           // :class="{}"
           if (isObjectExp(bindClassContent)) {
             // 获取{}中间的内容
-            const objectContent = getObjectOrArrayExpressionContent(bindClassContent)
+            let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
+            /** fix: :class="{}" 和 :class="[]" 报错 */
+            if (objectContent) {
+              objectContent += ','
+            }
             // :class="{}"  :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
-              result = `:class=${bindClassQuote}{${objectContent},${bindAttrNameContent2CssModuleNameStr}}${bindClassQuote}`
+              result = `:class=${bindClassQuote}{${objectContent}${bindAttrNameContent2CssModuleNameStr}}${bindClassQuote}`
             }
             // :class="{}"  :cls="[]" 或 :cls="exp"
             else {
-              result = `:class=${bindClassQuote}{${objectContent},${transformString2ObjectString(
+              result = `:class=${bindClassQuote}{${objectContent}${transformString2ObjectString(
                 bindAttrNameContent2CssModuleNameStr
               )}}${bindClassQuote}`
             }
@@ -89,12 +96,15 @@ export function transformAttrs(
           // :class="[]"
           else if (isArrayExp(bindClassContent)) {
             // 获取[]中间的内容
-            const arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
+            let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
             // :class="[]" :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
-              result = `:class=${bindClassQuote}{${transformString2ObjectString(
-                arrayContent
-              )},${bindAttrNameContent2CssModuleNameStr}}${bindClassQuote}`
+              arrayContent = transformString2ObjectString(arrayContent)
+              /** fix: :class="{}" 和 :class="[]" 报错 */
+              if (arrayContent) {
+                arrayContent += ','
+              }
+              result = `:class=${bindClassQuote}{${arrayContent}${bindAttrNameContent2CssModuleNameStr}}${bindClassQuote}`
             }
             // :class="[]" :cls="[]" 或 :cls="exp"
             else {
@@ -137,8 +147,12 @@ export function transformAttrs(
       }
       if (attrNameNode) {
         const attrNameQuote = getQuote(attrNameNode.loc.source)
-        let attrNameArr = transformString2Array((attrNameNode.value as TextNode).content)
-        if (attrNameArr.length === 0) return
+        let attrNameArr = transformString2Array(attrNameNode.value?.content || '')
+        // 没有值，删除 attrName 属性
+        if (attrNameArr.length === 0) {
+          s.update(attrNameNode.loc.start.offset, attrNameNode.loc.end.offset, '')
+          return
+        }
         // :class
         if (bindClassNode) {
           const bindClassQuote = getQuote(bindClassNode.loc.source)
@@ -149,8 +163,12 @@ export function transformAttrs(
           // :class="{}"  :class='{}'
           if (isObjectExp(bindClassContent)) {
             // 获取{}中间的内容
-            const objectContent = getObjectOrArrayExpressionContent(bindClassContent)
-            result = `:class=${bindClassQuote}{${objectContent},${attrNameArr
+            let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
+            /** fix: :class="{}" 和 :class="[]" 报错 */
+            if (objectContent) {
+              objectContent += ','
+            }
+            result = `:class=${bindClassQuote}{${objectContent}${attrNameArr
               .map((val) => `[${cssModuleName}[${strQuote}${val}${strQuote}]]:true`)
               .join(',')}}${bindClassQuote}`
           }
@@ -185,7 +203,7 @@ export function transformAttrs(
           )
         }
       }
-      node.children && transformAttrs(node.children as ElementNode[], s, attrName, cssModuleName)
+      node.children && parseHtml(node.children as ElementNode[], s, attrName, cssModuleName)
     }
   })
 }
