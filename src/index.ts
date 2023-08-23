@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite'
-import type { ElementNode, AttributeNode } from '@vue/compiler-core'
+import type { AttributeNode } from '@vue/compiler-core'
 import type { PluginOptions } from './utils/types'
 import MagicString from 'magic-string'
 import { parseVue } from './utils/parseVue'
@@ -7,16 +7,11 @@ import { parseHtml } from './utils/parseHtml'
 import { parsePug } from './utils/parsePug'
 import { isLegalVariate } from './utils/tool'
 
-// 默认配置
-const defaultOptions: Partial<PluginOptions> = {
-  attrName: 'cls'
-}
-
 export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
   const options = {
-    ...defaultOptions,
+    attrName: 'cls', // 默认属性名
     ...userOptions
-  } as PluginOptions
+  }
   return {
     name: 'vite-plugin-vue-css-module',
     enforce: 'pre',
@@ -50,7 +45,7 @@ export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): 
             }
           } else {
             if (templateAst.children.length === 0) return
-            parseHtml(templateAst.children as ElementNode[], s, options.attrName, cssModuleName)
+            parseHtml(templateAst.children, s, options.attrName, cssModuleName)
             return {
               code: s.toString(),
               map: s.generateMap()

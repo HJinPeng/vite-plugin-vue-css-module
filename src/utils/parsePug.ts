@@ -6,7 +6,7 @@ import {
   transform2SingleQuotes,
   transformExp,
   transformString2Array,
-  transformString2ObjectString,
+  transformString2ObjectString
 } from './tool'
 
 // 属性节点
@@ -25,10 +25,10 @@ interface Node {
 
 // pug包，用于动态导入，避免不是用pug模板的项目报错
 let pugPackage: {
-  parse: any,
-  lexer: any,
-  walk: any,
-  wrap: any,
+  parse: any
+  lexer: any
+  walk: any
+  wrap: any
   generate: any
 }
 
@@ -44,8 +44,8 @@ const setPugPackage = () => {
 
 export function parsePug(source: string, attrName: string, cssModuleName: string) {
   /** fix: 非使用pug模板的项目报缺少pug的相关依赖 */
-  if(!pugPackage) setPugPackage();
-  const { parse, lexer, walk, wrap, generate } = pugPackage;
+  if (!pugPackage) setPugPackage()
+  const { parse, lexer, walk, wrap, generate } = pugPackage
   const ast = parse(lexer(source))
   walk(ast, (node: Node) => {
     if (node.attrs?.length) {
@@ -96,14 +96,14 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
             // :class="{}"  :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
               result = `"{${objectContent}${bindAttrNameContent2CssModuleNameStr}}"`
-            } 
+            }
             // :class="{}"  :cls="[]" 或 :cls="exp"
             else {
               result = `"{${objectContent}${transformString2ObjectString(
                 bindAttrNameContent2CssModuleNameStr
               )}}"`
             }
-          } 
+          }
           // :class="[]"
           else if (isArrayExp(bindClassContent)) {
             // 获取[]中间的内容
@@ -117,11 +117,11 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
               }
               result = `"{${arrayContent}${bindAttrNameContent2CssModuleNameStr}}"`
             }
-            // :class="[]" :cls="[]" 或 :cls="exp" 
+            // :class="[]" :cls="[]" 或 :cls="exp"
             else {
               result = `"[${arrayContent},${bindAttrNameContent2CssModuleNameStr}]"`
             }
-          } 
+          }
           // :class="exp"
           else {
             // :class="exp" :cls="{}"
@@ -129,7 +129,7 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
               result = `"{${transformString2ObjectString(
                 bindClassContent
               )},${bindAttrNameContent2CssModuleNameStr}}"`
-            } 
+            }
             // :class="exp" :cls="[]" 或 :cls="exp"
             else {
               result = `"[${bindClassContent},${bindAttrNameContent2CssModuleNameStr}]"`
@@ -188,7 +188,7 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
           bindClassNode.val = result
           // 删除 attrName 属性
           node.attrs = node.attrs.filter((attr) => attr !== attrNameNode)
-        } 
+        }
         // 只存在 或 不存在 class
         else {
           attrNameNode.name = `:class`

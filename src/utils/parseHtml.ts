@@ -1,9 +1,4 @@
-import type {
-  AttributeNode,
-  DirectiveNode,
-  SimpleExpressionNode,
-  ElementNode
-} from '@vue/compiler-core'
+import type { AttributeNode, DirectiveNode, TemplateChildNode } from '@vue/compiler-core'
 import MagicString from 'magic-string'
 import {
   trimString,
@@ -18,43 +13,37 @@ import {
 } from './tool'
 
 export function parseHtml(
-  childNode: ElementNode[],
+  childNode: TemplateChildNode[],
   s: MagicString,
   attrName: string,
   cssModuleName: string
 ) {
   childNode.forEach((node) => {
-    if (node.props) {
+    if ('props' in node) {
       let bindClassNode: DirectiveNode | undefined,
         attrNameNode: AttributeNode | undefined,
         bindAttrNameNode: DirectiveNode | undefined
       node.props.forEach((prop) => {
-        // :class
-        if (
-          prop.name === 'bind' &&
-          ((prop as DirectiveNode).arg as SimpleExpressionNode).content === 'class'
-        ) {
-          bindClassNode = prop as DirectiveNode
+        if (prop.name === 'bind' && 'arg' in prop && prop.arg && 'content' in prop.arg) {
+          // :class
+          if (prop.arg.content === 'class') {
+            bindClassNode = prop
+          }
+          // 如果 attrName = cls, 则是 :cls=""
+          else if (prop.arg.content === attrName) {
+            bindAttrNameNode = prop
+          }
         }
         // 如果 attrName = cls, 则是 cls=""
-        else if (prop.name === attrName) {
-          attrNameNode = prop as AttributeNode
-        }
-        // 如果 attrName = cls, 则是 :cls=""
-        else if (
-          prop.name === 'bind' &&
-          ((prop as DirectiveNode).arg as SimpleExpressionNode).content === attrName
-        ) {
-          bindAttrNameNode = prop as DirectiveNode
+        else if (prop.name === attrName && 'value' in prop) {
+          attrNameNode = prop
         }
       })
       // 如果 attrName = cls, 且 :cls="" 存在
-      if (bindAttrNameNode) {
+      if (bindAttrNameNode && bindAttrNameNode.exp && 'content' in bindAttrNameNode.exp) {
         // 返回表达式的引号 :cls='' -> '   :cls="" -> "
         const bindAttrNameQuote = getQuote(bindAttrNameNode.loc.source)
-        const bindAttrNameContent = trimString(
-          (bindAttrNameNode.exp as SimpleExpressionNode).content
-        )
+        const bindAttrNameContent = trimString(bindAttrNameNode.exp.content)
         // 将:cls=""中的类名加上cssModuleName.
         let bindAttrNameContent2CssModuleNameStr: string = transformExp(
           bindAttrNameContent,
@@ -66,9 +55,9 @@ export function parseHtml(
           return
         }
         // :class exist
-        if (bindClassNode) {
+        if (bindClassNode && bindClassNode.exp && 'content' in bindClassNode.exp) {
           const bindClassQuote = getQuote(bindClassNode.loc.source)
-          const bindClassContent = trimString((bindClassNode.exp as SimpleExpressionNode).content)
+          const bindClassContent = trimString(bindClassNode.exp.content)
           // :class 和 :cls 用的引号不一致（源代码不规范的情况可能出现）
           if (bindAttrNameQuote !== bindClassQuote) {
             bindAttrNameContent2CssModuleNameStr = swapQuotes(bindAttrNameContent2CssModuleNameStr)
@@ -154,10 +143,10 @@ export function parseHtml(
           return
         }
         // :class
-        if (bindClassNode) {
+        if (bindClassNode && bindClassNode.exp && 'content' in bindClassNode.exp) {
           const bindClassQuote = getQuote(bindClassNode.loc.source)
           const strQuote = bindClassQuote === "'" ? '"' : "'"
-          const bindClassContent = trimString((bindClassNode.exp as SimpleExpressionNode).content)
+          const bindClassContent = trimString(bindClassNode.exp.content)
 
           let result: string
           // :class="{}"  :class='{}'
@@ -203,7 +192,7 @@ export function parseHtml(
           )
         }
       }
-      node.children && parseHtml(node.children as ElementNode[], s, attrName, cssModuleName)
+      node.children && parseHtml(node.children, s, attrName, cssModuleName)
     }
   })
 }
