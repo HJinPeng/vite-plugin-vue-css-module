@@ -78,7 +78,8 @@ export function parseHtml(
             // :class="{}"  :cls="[]" 或 :cls="exp"
             else {
               result = `:class=${bindClassQuote}{${objectContent}${transformString2ObjectString(
-                bindAttrNameContent2CssModuleNameStr
+                bindAttrNameContent2CssModuleNameStr,
+                bindClassQuote === '"' ? "'" : '"'
               )}}${bindClassQuote}`
             }
           }
@@ -88,7 +89,10 @@ export function parseHtml(
             let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
             // :class="[]" :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
-              arrayContent = transformString2ObjectString(arrayContent)
+              arrayContent = transformString2ObjectString(
+                arrayContent,
+                bindClassQuote === '"' ? "'" : '"'
+              )
               /** fix: :class="{}" 和 :class="[]" 报错 */
               if (arrayContent) {
                 arrayContent += ','
@@ -105,7 +109,8 @@ export function parseHtml(
             // :class="exp" :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
               result = `:class=${bindClassQuote}{${transformString2ObjectString(
-                bindClassContent
+                bindClassContent,
+                bindClassQuote === '"' ? "'" : '"'
               )},${bindAttrNameContent2CssModuleNameStr}}${bindClassQuote}`
             }
             // :class="exp" :cls="[]" 或 :cls="exp"
@@ -163,8 +168,11 @@ export function parseHtml(
           }
           // :class="[]" :class='[]'
           else if (isArrayExp(bindClassContent)) {
-            const arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
-            result = `:class=${bindClassQuote}[${arrayContent},${attrNameArr
+            let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
+            if (arrayContent) {
+              arrayContent += ','
+            }
+            result = `:class=${bindClassQuote}[${arrayContent}${attrNameArr
               .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
               .join(',')}]${bindClassQuote}`
           }

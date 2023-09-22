@@ -50,15 +50,24 @@ export function transformString2Array(code: string) {
 /**
  * 将 字符串 转为 对象中的key:value 字符串。eg: type && $style[`red`] -> [type && $style[`red`]]:type && $style[`red`]
  * @param code String
+ * @param quote Quote 字符串中的分号
  * @returns String
  */
-export function transformString2ObjectString(code: string) {
+export function transformString2ObjectString(code: string, quote: Quote): string {
   if (!code) return ''
-  return code
-    .split(',')
+  // fix: 修复字符串中非分割意义的,也被切割的问题
+  return splitStr2Arr(code, quote)
     .map((val) => {
       const _val = trimString(val)
-      return `[${_val}]:${_val}`
+      if (isObjectExp(_val)) {
+        return _val.substring(1, _val.length - 1)
+      }
+      // 如果是数组，要递归
+      else if (isArrayExp(_val)) {
+        return transformString2ObjectString(_val.substring(1, _val.length - 1), quote)
+      } else {
+        return `[${_val}]:${_val}`
+      }
     })
     .join(',')
 }
@@ -68,10 +77,15 @@ export function transformString2ObjectString(code: string) {
  * @param code String
  * @param cssModuleName 模块名
  * @param quote 引号类型
- * @param keepReturnType 返回值是否保留原类型，true: {***} => {***}, false: {***} => *** 
+ * @param keepReturnType 返回值是否保留原类型，true: {***} => {***}, false: {***} => ***
  * @returns String
  */
-export function transformExp(code: string, cssModuleName: string, quote: Quote, keepReturnType: Boolean = false): string {
+export function transformExp(
+  code: string,
+  cssModuleName: string,
+  quote: Quote,
+  keepReturnType: Boolean = false
+): string {
   // :[attrName]="{}" :[attrName]='{}'
   if (isObjectExp(code)) {
     return transformObject(code, cssModuleName, quote, keepReturnType)
@@ -86,112 +100,116 @@ export function transformExp(code: string, cssModuleName: string, quote: Quote, 
   }
 }
 
-
 /**
  * 将字符串根据英文逗号, 切割成数组。其中 {}, [] 是一个整体
- * eg: 'red', ['green', { red:  type === ' red{, '}, {type}], {} 
+ * eg: 'red', ['green', { red:  type === ' red{, '}, {type}], {}
  *     =>
  *     [
- *        'red', 
- *        ['green', { red: type === ' red{, '}, {type}], 
+ *        'red',
+ *        ['green', { red: type === ' red{, '}, {type}],
  *        {}
  *     ]
- *     
+ *
  *     red: type === ' red{, ', type
  *     =>
  *     [
  *        red: type === ' red{, ',
  *        type
  *     ]
- * @param code 字符串 
+ * @param code 字符串
  * @param quote 字符串内用到的引号
  * @returns 切割后的数组
  */
 function splitStr2Arr(code: string, quote: Quote) {
   // 切割后的数组
-  const result = [];
+  const result = []
   // 缓存的字符
-  let buffer = '';
+  let buffer = ''
   // 栈，存放 [ { '
-  let stack:string[] = [];
+  let stack: string[] = []
 
   for (let i = 0; i < code.length; i++) {
-    const char = code[i];
+    const char = code[i]
     if (char === '{' || char === '[') {
       // 如果stack的顶部是引号, 则不用进栈，理解为普通字符。否则进栈
-      if(stack.length > 0 && stack[stack.length - 1] === quote) {
-        buffer += char;
-      }else {
-        stack.push(char);
-        buffer += char;
+      if (stack.length > 0 && stack[stack.length - 1] === quote) {
+        buffer += char
+      } else {
+        stack.push(char)
+        buffer += char
       }
     } else if (char === '}') {
       // 如果stack的顶部是{, 则{出栈
       if (stack.length > 0 && stack[stack.length - 1] === '{') {
-        stack.pop();
-        buffer += char;
+        stack.pop()
+        buffer += char
       } else {
-        buffer += char;
+        buffer += char
       }
-    }else if(char === ']') {
+    } else if (char === ']') {
       // 如果stack的顶部是[, 则[出栈
       if (stack.length > 0 && stack[stack.length - 1] === '[') {
-        stack.pop();
-        buffer += char;
+        stack.pop()
+        buffer += char
       } else {
-        buffer += char;
+        buffer += char
       }
-    }else if(char === quote) {
+    } else if (char === quote) {
       // 如果stack的顶部是引号，则引号出栈。否则引号要入栈，用于后续判断{[}]是 普通字符 还是 对象、数组的起止符号
-      if(stack.length > 0 && stack[stack.length - 1] === quote) {
-        stack.pop();
-        buffer += char;
-      }else {
+      if (stack.length > 0 && stack[stack.length - 1] === quote) {
+        stack.pop()
+        buffer += char
+      } else {
         stack.push(quote)
-        buffer += char;
+        buffer += char
       }
     } else if (char === ',') {
       // 碰到逗号，当栈为空了，则将缓存字符作为数组的一项，如果栈不是空的，那逗号就只是一个普通字符
       if (stack.length === 0) {
-        result.push(trimString(buffer));
-        buffer = '';
+        result.push(trimString(buffer))
+        buffer = ''
       } else {
-        buffer += char;
+        buffer += char
       }
     } else {
-      buffer += char;
+      buffer += char
     }
   }
 
   if (trimString(buffer) !== '') {
-    result.push(trimString(buffer));
+    result.push(trimString(buffer))
   }
 
-  return result;
+  return result
 }
-
 
 /**
  * 将 {} 中的类名换为 $style[`类名`]
  * @param code String
  * @param cssModuleName 模块名
  * @param quote 引号类型
- * @param keepReturnType 返回值是否保留原类型，true: {***} => {***}, false: {***} => *** 
+ * @param keepReturnType 返回值是否保留原类型，true: {***} => {***}, false: {***} => ***
  * @returns 转换后去除{}的字符串
  */
-function transformObject(code: string, cssModuleName: string, quote: Quote, keepReturnType: Boolean): string {
+function transformObject(
+  code: string,
+  cssModuleName: string,
+  quote: Quote,
+  keepReturnType: Boolean
+): string {
   const content = getObjectOrArrayExpressionContent(code)
   if (!content) return ''
   const contentArr = splitStr2Arr(content, quote)
   const result = contentArr
     .map((item) => {
       // 没有冒号时，即 { selected } 这种情况，则直接取 selected
-      let key:string = item, value:string = item;
+      let key: string = item,
+        value: string = item
       // fix: type: type === 'a:b'   这里取第一个冒号进行切割
-      let firstColonIndex = item.indexOf(':');
-      if(firstColonIndex !== -1) {
-        key = item.slice(0, firstColonIndex);
-        value = item.slice(firstColonIndex + 1);
+      let firstColonIndex = item.indexOf(':')
+      if (firstColonIndex !== -1) {
+        key = item.slice(0, firstColonIndex)
+        value = item.slice(firstColonIndex + 1)
       }
       let _key = trimString(key)
       // { [type]: true } => [$style[type]]: true;
@@ -202,7 +220,7 @@ function transformObject(code: string, cssModuleName: string, quote: Quote, keep
       return `[${cssModuleName}[${_key}]]:${trimString(value)}`
     })
     .join(',')
-  return keepReturnType ? '{' + result + '}' : result;
+  return keepReturnType ? '{' + result + '}' : result
 }
 
 /**
@@ -210,22 +228,29 @@ function transformObject(code: string, cssModuleName: string, quote: Quote, keep
  * @param code String
  * @param cssModuleName 模块名
  * @param quote 引号类型
- * @param keepType 返回值是否保留原类型，true: [***] => [***], false: [***] => *** 
+ * @param keepType 返回值是否保留原类型，true: [***] => [***], false: [***] => ***
  * @returns 转换后去除[]的字符串
  */
-function transformArray(code: string, cssModuleName: string, quote: Quote, keepReturnType: Boolean): string {
+function transformArray(
+  code: string,
+  cssModuleName: string,
+  quote: Quote,
+  keepReturnType: Boolean
+): string {
   const content = getObjectOrArrayExpressionContent(code)
   if (!content) return ''
-  
-  const contentArr = splitStr2Arr(content, quote);
-  const result = contentArr.map((item) => {
-    /**
-     * 数组中可以是各种表达式：数组，对象，表达式，字符串
-     * 保持返回类型
-     */
-    return transformExp(item, cssModuleName, quote, true)
-  }).join(',')
-  return keepReturnType ? '[' +result + ']':  result
+
+  const contentArr = splitStr2Arr(content, quote)
+  const result = contentArr
+    .map((item) => {
+      /**
+       * 数组中可以是各种表达式：数组，对象，表达式，字符串
+       * 保持返回类型
+       */
+      return transformExp(item, cssModuleName, quote, true)
+    })
+    .join(',')
+  return keepReturnType ? '[' + result + ']' : result
 }
 
 /**
