@@ -100,7 +100,8 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
             // :class="{}"  :cls="[]" 或 :cls="exp"
             else {
               result = `"{${objectContent}${transformString2ObjectString(
-                bindAttrNameContent2CssModuleNameStr
+                bindAttrNameContent2CssModuleNameStr,
+                "'"
               )}}"`
             }
           }
@@ -110,7 +111,7 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
             let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
             // :class="[]" :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
-              arrayContent = transformString2ObjectString(arrayContent)
+              arrayContent = transformString2ObjectString(arrayContent, "'")
               /** fix: :class="{}" 和 :class="[]" 报错 */
               if (arrayContent) {
                 arrayContent += ','
@@ -127,7 +128,8 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
             // :class="exp" :cls="{}"
             if (isObjectExp(bindAttrNameContent)) {
               result = `"{${transformString2ObjectString(
-                bindClassContent
+                bindClassContent,
+                "'"
               )},${bindAttrNameContent2CssModuleNameStr}}"`
             }
             // :class="exp" :cls="[]" 或 :cls="exp"
