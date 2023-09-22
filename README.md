@@ -88,6 +88,8 @@ Then, use it in the `**.vue` file.
   <div class="yellow" :class="[ type ]" :cls="['red', type === 'active' ? 'red--active' : 'red--inactive], true && 'red--focus'">vite-plugin-vue-css-module</div>
   <div :cls="{ red: type === 'default' , ['red--' + type]: type === 'active' }">vite-plugin-vue-css-module</div>
   <div :cls="type === 'active' && 'red--active'"></div>
+  <!-- Complex situations are also supported -->
+  <div :class="{ type: true }" :cls="[type1, [type2, type3, { type4: true }], { type5: true }, 'type4']"></div>
   <!-- Non-standard writing is also supported -->
   <div class="yellow" :cls=' [ 1 === 1 ?`${type}--active` : type + "--inactive" ]    '></div>
 </template>
