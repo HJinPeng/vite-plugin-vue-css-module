@@ -2,6 +2,7 @@ import type { Assertion, AsymmetricMatchersContaining } from 'vitest'
 
 interface CustomMatchers<R = unknown> {
   toBeCssModule(string): R
+  toBePugCssModule(string): R
 }
 
 declare module 'vitest' {

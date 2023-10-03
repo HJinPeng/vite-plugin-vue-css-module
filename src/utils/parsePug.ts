@@ -8,6 +8,7 @@ import {
   transformString2Array,
   transformString2ObjectString
 } from './tool'
+import { PluginOptions } from './types'
 
 // 属性节点
 interface Attr {
@@ -42,16 +43,17 @@ const setPugPackage = () => {
   }
 }
 
-export function parsePug(source: string, attrName: string, cssModuleName: string) {
+export function parsePug(source: string, options: PluginOptions, cssModuleName: string) {
   /** fix: 非使用pug模板的项目报缺少pug的相关依赖 */
   if (!pugPackage) setPugPackage()
+  const { attrName, pugClassLiterals } = options
   const { parse, lexer, walk, wrap, generate } = pugPackage
   const ast = parse(lexer(source))
   walk(ast, (node: Node) => {
     if (node.attrs?.length) {
       let bindClassNode: Attr | undefined,
-        attrNameNode: Attr | undefined,
-        bindAttrNameNode: Attr | undefined
+        bindAttrNameNode: Attr | undefined,
+        attrNameNodes: Attr[] = []
       node.attrs.forEach((attr) => {
         switch (attr.name) {
           case ':class':
@@ -63,8 +65,13 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
             bindAttrNameNode = attr
             break
           case attrName:
-            attrNameNode = attr
+            attrNameNodes.push(attr)
             break
+          case 'class':
+            // Class literals are known to have mustEscape false.
+            if (pugClassLiterals && attr.mustEscape === false) {
+              attrNameNodes.push(attr)
+            }
         }
       })
       // 如果 attrName = cls, 且 :cls="" 存在
@@ -150,53 +157,58 @@ export function parsePug(source: string, attrName: string, cssModuleName: string
           }
         }
       }
-      if (attrNameNode) {
-        const attrNameArr = transformString2Array(getPugVal(attrNameNode.val))
+      if (attrNameNodes.length) {
+        const attrNameArr = transformString2Array(
+          attrNameNodes.map((node) => getPugVal(node.val)).join(' ')
+        )
         // cls 为空时，直接删除属性
-        if (attrNameArr.length === 0) {
-          node.attrs = node.attrs.filter((attr) => attr !== attrNameNode)
-          return
-        }
-        // :class
-        if (bindClassNode) {
-          let result: string
-          const bindClassContent = transform2SingleQuotes(getPugVal(bindClassNode.val))
-          // :class="{}"  :class='{}'
-          if (isObjectExp(bindClassContent)) {
-            // 获取{}中间的内容
-            let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
-            /** fix: :class="{}" 和 :class="[]" 报错 */
-            if (objectContent) {
-              objectContent += ','
+        if (attrNameArr.length) {
+          // :class
+          if (bindClassNode) {
+            let result: string
+            const bindClassContent = transform2SingleQuotes(getPugVal(bindClassNode.val))
+            // :class="{}"  :class='{}'
+            if (isObjectExp(bindClassContent)) {
+              // 获取{}中间的内容
+              let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
+              /** fix: :class="{}" 和 :class="[]" 报错 */
+              if (objectContent) {
+                objectContent += ','
+              }
+              result = `"{${objectContent}${attrNameArr
+                .map((cls) => `[${cssModuleName}['${cls}']]:true`)
+                .join(',')}}"`
             }
-            result = `"{${objectContent}${attrNameArr
-              .map((cls) => `[${cssModuleName}['${cls}']]:true`)
-              .join(',')}}"`
+            // :class="[]" :class='[]'
+            else if (isArrayExp(bindClassContent)) {
+              const arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
+              result = `"[${arrayContent}, ${attrNameArr
+                .map((cls) => `${cssModuleName}['${cls}']`)
+                .join(',')}]"`
+            }
+            // :class="type" :class='type === "add" && "red"' :class="type === 'add' ? 'red' : 'green'"
+            else {
+              result = `"[${bindClassContent},${attrNameArr
+                .map((cls) => `${cssModuleName}['${cls}']`)
+                .join(',')}]"`
+            }
+            // 修改 :class的值
+            bindClassNode.val = result
           }
-          // :class="[]" :class='[]'
-          else if (isArrayExp(bindClassContent)) {
-            const arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
-            result = `"[${arrayContent}, ${attrNameArr
-              .map((cls) => `${cssModuleName}['${cls}']`)
-              .join(',')}]"`
-          }
-          // :class="type" :class='type === "add" && "red"' :class="type === 'add' ? 'red' : 'green'"
+          // 只存在 或 不存在 class
           else {
-            result = `"[${bindClassContent},${attrNameArr
+            // Convert the first class attribute to :class.
+            const attrNameNode = attrNameNodes.shift()!
+            attrNameNode.mustEscape = true
+            attrNameNode.name = `:class`
+            attrNameNode.val = `"[${attrNameArr
               .map((cls) => `${cssModuleName}['${cls}']`)
               .join(',')}]"`
           }
-          // 修改 :class的值
-          bindClassNode.val = result
-          // 删除 attrName 属性
-          node.attrs = node.attrs.filter((attr) => attr !== attrNameNode)
         }
-        // 只存在 或 不存在 class
-        else {
-          attrNameNode.name = `:class`
-          attrNameNode.val = `"[${attrNameArr
-            .map((cls) => `${cssModuleName}['${cls}']`)
-            .join(',')}]"`
+        // 删除 attrName 属性
+        if (attrNameNodes.length) {
+          node.attrs = node.attrs.filter((attr) => !attrNameNodes.includes(attr))
         }
       }
     }
