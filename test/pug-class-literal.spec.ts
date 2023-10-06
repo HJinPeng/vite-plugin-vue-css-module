@@ -18,4 +18,9 @@ describe('pug class literal', () => {
       `class="red yellow" :class="[$style['wrap1'], $style['wrap2'], $style['wrap3'], $style['wrap4']]"`
     )
   })
+  test('class literals, module classes, normal classes, bind classes: class < :class < class literals < cls < :cls', () => {
+    expect(`.wrap1.wrap2(class="red yellow" cls="wrap3" :class="[type]" :cls="[wrap4]")`).toBePugCssModule(
+      `class="red yellow" :class="[type, $style['wrap1'], $style['wrap2'], $style['wrap3'], $style[wrap4]]"`
+    )
+  })
 })

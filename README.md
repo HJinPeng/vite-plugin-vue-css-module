@@ -123,7 +123,9 @@ In addition, if you are using the pug template, the writing method is exactly th
 
 In pug templates, it's possible to convert class literals to module classes.
 
-To enable that, set `pugClassLiterals: true` in plugin options:
+To enable that, set `pugClassLiterals: true` in plugin options:  
+
+When you set it to `true`, the class name priority is as follows: `class` < `:class` < `class literals` < `cls` < `:cls`
 
 ```js
 // vite.config.js

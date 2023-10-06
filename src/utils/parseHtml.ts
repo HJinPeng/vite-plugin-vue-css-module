@@ -39,7 +39,70 @@ export function parseHtml(
           attrNameNode = prop
         }
       })
-      // 如果 attrName = cls, 且 :cls="" 存在
+
+      // 如果 attrName = cls，处理 cls 内容
+      if (attrNameNode) {
+        const attrNameQuote = getQuote(attrNameNode.loc.source)
+        let attrNameArr = transformString2Array(attrNameNode.value?.content || '')
+        // 没有值，删除 attrName 属性
+        if (attrNameArr.length === 0) {
+          s.update(attrNameNode.loc.start.offset, attrNameNode.loc.end.offset, '')
+          return
+        }
+        // :class
+        if (bindClassNode && bindClassNode.exp && 'content' in bindClassNode.exp) {
+          const bindClassQuote = getQuote(bindClassNode.loc.source)
+          const strQuote = bindClassQuote === "'" ? '"' : "'"
+          const bindClassContent = trimString(bindClassNode.exp.content)
+
+          let result: string
+          // :class="{}"  :class='{}'
+          if (isObjectExp(bindClassContent)) {
+            // 获取{}中间的内容
+            let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
+            /** fix: :class="{}" 和 :class="[]" 报错 */
+            if (objectContent) {
+              objectContent += ','
+            }
+            result = `:class=${bindClassQuote}{${objectContent}${attrNameArr
+              .map((val) => `[${cssModuleName}[${strQuote}${val}${strQuote}]]:true`)
+              .join(',')}}${bindClassQuote}`
+          }
+          // :class="[]" :class='[]'
+          else if (isArrayExp(bindClassContent)) {
+            let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
+            if (arrayContent) {
+              arrayContent += ','
+            }
+            result = `:class=${bindClassQuote}[${arrayContent}${attrNameArr
+              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
+              .join(',')}]${bindClassQuote}`
+          }
+          // :class="type" :class='type === "add" && "red"' :class="type === 'add' ? 'red' : 'green'"
+          else {
+            result = `:class=${bindClassQuote}[${bindClassContent},${attrNameArr
+              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
+              .join(',')}]${bindClassQuote}`
+          }
+          // 修改 :class 属性
+          s.update(bindClassNode.loc.start.offset, bindClassNode.loc.end.offset, result)
+          // 删除 attrName 属性
+          s.update(attrNameNode.loc.start.offset, attrNameNode.loc.end.offset, '')
+        }
+        // 只存在 或 不存在 class
+        else {
+          const strQuote = attrNameQuote === "'" ? '"' : "'"
+          // 将 attrName 属性 改为 :class
+          s.update(
+            attrNameNode.loc.start.offset,
+            attrNameNode.loc.end.offset,
+            `:class=${attrNameQuote}[${attrNameArr
+              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
+              .join(',')}]${attrNameQuote}`
+          )
+        }
+      }
+      // 如果 attrName = cls, 且 :cls="" 存在，处理 :cls 内容
       if (bindAttrNameNode && bindAttrNameNode.exp && 'content' in bindAttrNameNode.exp) {
         // 返回表达式的引号 :cls='' -> '   :cls="" -> "
         const bindAttrNameQuote = getQuote(bindAttrNameNode.loc.source)
@@ -137,67 +200,6 @@ export function parseHtml(
               `:class=${bindAttrNameQuote}[${bindAttrNameContent2CssModuleNameStr}]${bindAttrNameQuote}`
             )
           }
-        }
-      }
-      if (attrNameNode) {
-        const attrNameQuote = getQuote(attrNameNode.loc.source)
-        let attrNameArr = transformString2Array(attrNameNode.value?.content || '')
-        // 没有值，删除 attrName 属性
-        if (attrNameArr.length === 0) {
-          s.update(attrNameNode.loc.start.offset, attrNameNode.loc.end.offset, '')
-          return
-        }
-        // :class
-        if (bindClassNode && bindClassNode.exp && 'content' in bindClassNode.exp) {
-          const bindClassQuote = getQuote(bindClassNode.loc.source)
-          const strQuote = bindClassQuote === "'" ? '"' : "'"
-          const bindClassContent = trimString(bindClassNode.exp.content)
-
-          let result: string
-          // :class="{}"  :class='{}'
-          if (isObjectExp(bindClassContent)) {
-            // 获取{}中间的内容
-            let objectContent = getObjectOrArrayExpressionContent(bindClassContent)
-            /** fix: :class="{}" 和 :class="[]" 报错 */
-            if (objectContent) {
-              objectContent += ','
-            }
-            result = `:class=${bindClassQuote}{${objectContent}${attrNameArr
-              .map((val) => `[${cssModuleName}[${strQuote}${val}${strQuote}]]:true`)
-              .join(',')}}${bindClassQuote}`
-          }
-          // :class="[]" :class='[]'
-          else if (isArrayExp(bindClassContent)) {
-            let arrayContent = getObjectOrArrayExpressionContent(bindClassContent)
-            if (arrayContent) {
-              arrayContent += ','
-            }
-            result = `:class=${bindClassQuote}[${arrayContent}${attrNameArr
-              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
-              .join(',')}]${bindClassQuote}`
-          }
-          // :class="type" :class='type === "add" && "red"' :class="type === 'add' ? 'red' : 'green'"
-          else {
-            result = `:class=${bindClassQuote}[${bindClassContent},${attrNameArr
-              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
-              .join(',')}]${bindClassQuote}`
-          }
-          // 修改 :class 属性
-          s.update(bindClassNode.loc.start.offset, bindClassNode.loc.end.offset, result)
-          // 删除 attrName 属性
-          s.update(attrNameNode.loc.start.offset, attrNameNode.loc.end.offset, '')
-        }
-        // 只存在 或 不存在 class
-        else {
-          const strQuote = attrNameQuote === "'" ? '"' : "'"
-          // 将 attrName 属性 改为 :class
-          s.update(
-            attrNameNode.loc.start.offset,
-            attrNameNode.loc.end.offset,
-            `:class=${attrNameQuote}[${attrNameArr
-              .map((val) => `${cssModuleName}[${strQuote}${val}${strQuote}]`)
-              .join(',')}]${attrNameQuote}`
-          )
         }
       }
       node.children && parseHtml(node.children, s, attrName, cssModuleName)
