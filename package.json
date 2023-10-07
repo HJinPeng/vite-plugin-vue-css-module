@@ -34,6 +34,13 @@
     "pug"
   ],
   "author": "jinpengh <13143352767@163.com>",
+  "contributors": [
+    {
+      "name": "Ilya Semenov",
+      "email": "ilya@semenov.co",
+      "url": "https://github.com/IlyaSemenov"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/HJinPeng/vite-plugin-vue-css-module"
