@@ -10,6 +10,7 @@ import { isLegalVariate } from './utils/tool'
 export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
   const options = {
     attrName: 'cls', // 默认属性名
+    pugClassLiterals: false,
     ...userOptions
   }
   return {
@@ -36,7 +37,7 @@ export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): 
             const langOffset = [langProps.loc.start.offset, langProps.loc.end.offset]
             // 删除 <template lang="pug"> 中的 lang="pug"
             s.update(langOffset[0], langOffset[1], '')
-            const result = parsePug(templateContent, options.attrName, cssModuleName)
+            const result = parsePug(templateContent, options, cssModuleName)
             // 将pug模板中的属性为 attrName 的值转为 cssModule写法，转为html模板
             s.update(templateOffset[0], templateOffset[1], result)
             return {

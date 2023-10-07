@@ -2,7 +2,8 @@ import { readFileSync, writeFileSync } from 'fs'
 import vueCssModule from '@/index'
 
 export const plugin = vueCssModule({
-  attrName: 'cls'
+  attrName: 'cls',
+  pugClassLiterals: true
 })
 
 /**
@@ -31,8 +32,8 @@ function assembleStyle(module?: string) {
  * @param module cssModule模块名
  * @returns vue组件
  */
-export function assembleVue(code: string, module?: string) {
-  let template = `<template><div ${code}></div></template>`
+export function assembleVue(lang: 'html' | 'pug', code: string, module?: string) {
+  let template = `<template lang="${lang}">${code}</template>`
   let style = assembleStyle(module)
   return template + style
 }
@@ -54,5 +55,7 @@ export function removeBlank(code: string) {
  */
 export function removeNonCoreCode(code: string, module?: string) {
   let style = assembleStyle(module)
-  return removeBlank(code.replace('<template><div ', '').replace('></div></template>' + style, ''))
+  return removeBlank(
+    code.replace(/<template.*?><div /, '').replace('></div></template>' + style, '')
+  )
 }

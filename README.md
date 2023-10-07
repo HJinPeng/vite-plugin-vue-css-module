@@ -119,7 +119,41 @@ In addition, if you are using the pug template, the writing method is exactly th
 > - The plugin will only find the first style tag that uses module and then use its name, which defaults to $style. In fact, setting a custom name such as `<style module="moduleName">` does not make sense for this plugin. 
 > - The plugin supports a variety of class name writing, although the writing is not very standardized.
 
+### Pug class literals
 
+In pug templates, it's possible to convert class literals to module classes.
+
+To enable that, set `pugClassLiterals: true` in plugin options:  
+
+When you set it to `true`, the class name priority is as follows: `class` < `:class` < `class literals` < `cls` < `:cls`
+
+```js
+// vite.config.js
+import vueCssModule from 'vite-plugin-vue-css-module'
+export default defineConfig({
+  plugins: [
+    vueCssModule({
+      // Disabled by default.
+      pugClassLiterals: true
+    }), 
+    vue()
+  ],
+})
+```
+
+Then:
+
+```html
+<template lang="pug">
+.red This is red.
+div(cls="red") This is red.
+div(class="red") This is not red.
+</template>
+
+<style module>
+.red { color: red; }
+</style>
+```
 
 ## License
 
