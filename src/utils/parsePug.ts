@@ -125,7 +125,7 @@ export function parsePug(source: string, options: PluginOptions, cssModuleName: 
             /**
              * fix: Duplicate :class
              */
-            bindClassNode = attrNameNode;
+            bindClassNode = attrNameNode
           }
         }
         // 删除 attrName 属性
