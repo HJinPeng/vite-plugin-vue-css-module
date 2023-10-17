@@ -55,17 +55,18 @@
     "rollup": "^3.25.3",
     "rollup-plugin-dts": "^6.1.0",
     "tslib": "^2.6.0",
+    "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "vitest": "^0.34.4"
   },
   "peerDependencies": {
     "@vue/compiler-core": "^3.0.0",
     "@vue/compiler-sfc": "^3.0.0",
-    "vite": "^4.0.0",
     "pug-code-gen": "^2.0.3",
     "pug-lexer": "^5.0.1",
     "pug-parser": "^6.0.0",
     "pug-runtime": "^3.0.1",
-    "pug-walk": "^2.0.0"
+    "pug-walk": "^2.0.0",
+    "vite": "^4.0.0"
   }
 }
