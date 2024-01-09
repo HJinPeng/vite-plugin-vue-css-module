@@ -37,7 +37,7 @@ export function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
 
           if (lang === 'pug') {
             const templateOffset = [template.loc.start.offset, template.loc.end.offset]
-            const result = parsePug(templateContent, options, cssModuleName)
+            const result = await parsePug(templateContent, options, cssModuleName)
             // 将pug模板中的属性为 attrName 的值转为 cssModule写法，转为html模板
             s.update(templateOffset[0], templateOffset[1], result)
             return {

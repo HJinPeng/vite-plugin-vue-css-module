@@ -2,13 +2,13 @@
   "name": "@breezystack/vite-plugin-vue-css-module",
   "version": "2.0.1",
   "description": "css-module syntactic sugar for vue3",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
       "types": "./dist/index.d.ts"
     }
   },
@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "dev": "rollup --watch --config rollup.config.ts --configPlugin rollup-plugin-esbuild",
-    "build": "rollup --watch --config rollup.config.ts --configPlugin rollup-plugin-esbuild",
+    "build": "del ./dist && rollup --config rollup.config.ts --configPlugin rollup-plugin-esbuild",
     "format": "prettier --write src/",
     "release": "npm version patch && npm publish",
     "test": "vitest",
@@ -53,11 +53,13 @@
   "homepage": "https://github.com/HJinPeng/vite-plugin-vue-css-module#readme",
   "license": "MIT",
   "dependencies": {
-    "@breezystack/vite-plugin-vue-css-module": "link:",
     "magic-string": "^0.30.5"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@vue/compiler-core": "^3.4.6",
+    "del": "^7.1.0",
+    "del-cli": "^5.1.0",
     "esbuild": "^0.19.11",
     "eslint": "^8.44.0",
     "prettier": "^3.0.3",
@@ -70,6 +72,7 @@
     "vue": "^3.4.6"
   },
   "peerDependencies": {
+    "@vue/compiler-core": "^3.4.6",
     "pug-code-gen": "^2.0.3",
     "pug-lexer": "^5.0.1",
     "pug-parser": "^6.0.0",
