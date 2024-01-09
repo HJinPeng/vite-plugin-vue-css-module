@@ -18,8 +18,8 @@
     "README.md"
   ],
   "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "rollup --watch --config rollup.config.ts --configPlugin rollup-plugin-esbuild",
+    "build": "rollup --watch --config rollup.config.ts --configPlugin rollup-plugin-esbuild",
     "format": "prettier --write src/",
     "release": "npm version patch && npm publish",
     "test": "vitest",
@@ -53,13 +53,18 @@
   "homepage": "https://github.com/HJinPeng/vite-plugin-vue-css-module#readme",
   "license": "MIT",
   "dependencies": {
+    "@breezystack/vite-plugin-vue-css-module": "link:",
     "magic-string": "^0.30.5"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "esbuild": "^0.19.11",
     "eslint": "^8.44.0",
     "prettier": "^3.0.3",
+    "rollup": "^4.9.4",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-esbuild": "^6.1.0",
     "tslib": "^2.6.0",
-    "tsup": "^8.0.1",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0",
     "vue": "^3.4.6"
