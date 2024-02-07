@@ -1,4 +1,4 @@
-import { parse } from '@vue/compiler-sfc'
+import { parse } from 'vue/compiler-sfc'
 
 /**
  * 获取.vue文件中的 cssModule的值 和 template的AST

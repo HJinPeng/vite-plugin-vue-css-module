@@ -10,6 +10,7 @@ import {
 } from './tool'
 import { PluginOptions } from './types'
 
+
 // 属性节点
 interface Attr {
   name: string
@@ -33,17 +34,17 @@ let pugPackage: {
   generate: any
 }
 
-const setPugPackage = () => {
+const setPugPackage = async () => {
   pugPackage = {
-    parse: require('pug-parser'),
-    lexer: require('pug-lexer'),
-    walk: require('pug-walk'),
-    wrap: require('pug-runtime/wrap'),
-    generate: require('pug-code-gen')
+    parse: await import('pug-parser'),
+    lexer: await import('pug-lexer'),
+    walk: await import('pug-walk'),
+    wrap: await import('pug-runtime/wrap'),
+    generate: await import('pug-code-gen')
   }
 }
 
-export function parsePug(source: string, options: PluginOptions, cssModuleName: string) {
+export async function parsePug(source: string, options: PluginOptions, cssModuleName: string) {
   /** fix: 非使用pug模板的项目报缺少pug的相关依赖 */
   if (!pugPackage) setPugPackage()
   const { attrName, pugClassLiterals } = options
