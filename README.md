@@ -66,7 +66,7 @@ First, add the configuration in the `vite.config.js` file
  
 ```js
 // vite.config.js
-import vueCssModule from 'vite-plugin-vue-css-module'
+import { vueCssModule } from 'vite-plugin-vue-css-module'
 export default defineConfig({
   plugins: [
     vueCssModule({
