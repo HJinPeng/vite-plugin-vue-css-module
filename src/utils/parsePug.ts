@@ -36,17 +36,17 @@ let pugPackage: {
 
 const setPugPackage = async () => {
   pugPackage = {
-    parse: await import('pug-parser'),
-    lexer: await import('pug-lexer'),
-    walk: await import('pug-walk'),
-    wrap: await import('pug-runtime/wrap'),
-    generate: await import('pug-code-gen')
+    parse: (await import('pug-parser')).default,
+    lexer: (await import('pug-lexer')).default,
+    walk: (await import('pug-walk')).default,
+    wrap: (await import('pug-runtime/wrap.js')).default,
+    generate: (await import('pug-code-gen')).default
   }
 }
 
 export async function parsePug(source: string, options: PluginOptions, cssModuleName: string) {
   /** fix: 非使用pug模板的项目报缺少pug的相关依赖 */
-  if (!pugPackage) setPugPackage()
+  if (!pugPackage) await setPugPackage()
   const { attrName, pugClassLiterals } = options
   const { parse, lexer, walk, wrap, generate } = pugPackage
   const ast = parse(lexer(source))

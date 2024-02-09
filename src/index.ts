@@ -6,7 +6,7 @@ import { parseHtml } from './utils/parseHtml'
 import { parsePug } from './utils/parsePug'
 import { isLegalVariate } from './utils/tool'
 
-export function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
+export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
   const options = {
     attrName: 'cls', // 默认属性名
     pugClassLiterals: false,
@@ -28,11 +28,8 @@ export function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
           }
           const s = new MagicString(code)
 
-          if (!templateAst) {
-            return {
-              code: s.toString(),
-              map: s.generateMap()
-            }
+          if (!templateAst || templateAst.children.length === 0) {
+            return 
           }
 
           if (lang === 'pug') {
@@ -46,7 +43,6 @@ export function vueCssModule(userOptions: Partial<PluginOptions> = {}): Plugin {
             }
           }
 
-          if (templateAst.children.length === 0) return
           parseHtml(templateAst.children, s, options.attrName, cssModuleName)
           return {
             code: s.toString(),

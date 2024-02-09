@@ -10,10 +10,10 @@ declare module 'pug-walk' {
   export function walk(ast: any, fn: (node: any) => void): void
 }
 
-declare module 'pug-runtime/wrap' {
-  export function wrap(source: string): string
+declare module 'pug-runtime/wrap.js' {
+  export function wrap(source: string): any
 }
 
 declare module 'pug-code-gen' {
-  export function generate(ast: any): string
+  export function generate(ast: any): any
 }
