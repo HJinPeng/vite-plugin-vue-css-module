@@ -29,7 +29,7 @@ export default function vueCssModule(userOptions: Partial<PluginOptions> = {}): 
           const s = new MagicString(code)
 
           if (!templateAst || templateAst.children.length === 0) {
-            return 
+            return
           }
 
           if (lang === 'pug') {

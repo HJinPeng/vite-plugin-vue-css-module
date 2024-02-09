@@ -37,6 +37,8 @@
     "cls",
     "vue3",
     "vite",
+    "vite4",
+    "vite5",
     "pug"
   ],
   "author": "jinpengh <13143352767@163.com>",

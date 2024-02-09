@@ -10,7 +10,6 @@ import {
 } from './tool'
 import { PluginOptions } from './types'
 
-
 // 属性节点
 interface Attr {
   name: string
