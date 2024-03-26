@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite'
 import type { PluginOptions } from './utils/types'
-import MagicString from 'magic-string'
+import { MagicString } from 'vue/compiler-sfc'
 import { parseVue } from './utils/parseVue'
 import { parseHtml } from './utils/parseHtml'
 import { parsePug } from './utils/parsePug'

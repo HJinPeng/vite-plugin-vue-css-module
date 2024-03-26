@@ -8,9 +8,6 @@ dependencies:
   '@vue/compiler-core':
     specifier: ^3.4.6
     version: 3.4.21
-  magic-string:
-    specifier: ^0.30.5
-    version: 0.30.8
   vite:
     specifier: ^4.0.0 || ^5.0.0
     version: 5.2.6
