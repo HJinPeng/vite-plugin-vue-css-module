@@ -6,5 +6,12 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ['vite', 'vue', 'pug-parser', 'pug-lexer', 'pug-walk', 'pug-runtime/wrap.js', 'pug-code-gen', 'vue/compiler-sfc', 'magic-string']
+  // Remove those once https://github.com/egoist/tsup/issues/1099 is fixed.
+  external: [
+    'pug-code-gen',
+    'pug-lexer',
+    'pug-parser',
+    'pug-runtime',
+    'pug-walk',
+  ],
 })
