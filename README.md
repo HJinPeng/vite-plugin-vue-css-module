@@ -155,6 +155,26 @@ div(class="red") This is not red.
 </style>
 ```
 
+## Development
+
+Install dependencies:
+
+```sh
+pnpm install
+```
+
+Run tests:
+
+```sh
+pnpm test
+```
+
+Build release:
+
+```sh
+pnpm build
+```
+
 ## License
 
 MIT
