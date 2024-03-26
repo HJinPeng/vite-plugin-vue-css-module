@@ -26,28 +26,26 @@ interface Node {
 
 // pug包，用于动态导入，避免不是用pug模板的项目报错
 let pugPackage: {
-  parse: any
-  lexer: any
-  walk: any
-  wrap: any
-  generate: any
-}
+  parse: typeof import('pug-parser').default
+  lexer: typeof import('pug-lexer').default
+  walk: typeof import('pug-walk').default
+  generate: typeof import('pug-source-gen').default
+} | undefined
 
 const setPugPackage = async () => {
   pugPackage = {
     parse: (await import('pug-parser')).default,
     lexer: (await import('pug-lexer')).default,
     walk: (await import('pug-walk')).default,
-    wrap: (await import('pug-runtime/wrap.js')).default,
-    generate: (await import('pug-code-gen')).default
+    generate: (await import('pug-source-gen')).default
   }
 }
 
 export async function parsePug(source: string, options: PluginOptions, cssModuleName: string) {
+  const { attrName, pugClassLiterals } = options
   /** fix: 非使用pug模板的项目报缺少pug的相关依赖 */
   if (!pugPackage) await setPugPackage()
-  const { attrName, pugClassLiterals } = options
-  const { parse, lexer, walk, wrap, generate } = pugPackage
+  const { parse, lexer, walk, generate } = pugPackage!
   const ast = parse(lexer(source))
   walk(ast, (node: Node) => {
     if (node.attrs?.length) {
@@ -218,6 +216,5 @@ export async function parsePug(source: string, options: PluginOptions, cssModule
       }
     }
   })
-  const templateFn = wrap(generate(ast))
-  return templateFn()
+  return generate(ast)
 }

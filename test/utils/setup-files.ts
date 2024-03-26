@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import { assembleVue, removeNonCoreCode, removeBlank, plugin } from './utils'
+import { assembleVue, getTemplateCode, removeBlank, plugin } from './utils'
 
 // 扩展 .toBeCssModule
 expect.extend({
@@ -13,7 +13,7 @@ expect.extend({
 
 async function testVue(originVue: string, expected: string) {
   const { code: resultVue } = await (plugin as any).transform(originVue, 'toBeCssModule.vue')
-  const resultCore = removeNonCoreCode(resultVue)
+  const resultCore = getTemplateCode(resultVue)
   const expectedCore = removeBlank(expected)
   return {
     pass: resultCore === expectedCore,
