@@ -13,7 +13,7 @@ expect.extend({
 
 async function testVue(originVue: string, expected: string) {
   const { code: resultVue } = await (plugin as any).transform(originVue, 'toBeCssModule.vue')
-  const resultCore = getTemplateCode(resultVue)
+  const resultCore = removeBlank(getTemplateCode(resultVue))
   const expectedCore = removeBlank(expected)
   return {
     pass: resultCore === expectedCore,

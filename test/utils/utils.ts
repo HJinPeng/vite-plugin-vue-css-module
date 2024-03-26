@@ -56,5 +56,5 @@ export function removeBlank(code: string) {
 export function getTemplateCode(code: string) {
   // For HTML templates, return the template div attributes (for historical reasons)
   // For Pug templates, return the full template
-  return removeBlank(code.replace(/.*<template.*?>(?:<div )?(.*?)(?:><\/div>)?<\/template>.*/, '$1'))
+  return code.replace(/.*<template.*?>(?:<div )?(.*?)(?:><\/div>)?<\/template>.*/, '$1')
 }
