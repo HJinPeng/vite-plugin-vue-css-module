@@ -1,8 +1,8 @@
 import type { Assertion, AsymmetricMatchersContaining } from 'vitest'
 
 interface CustomMatchers<R = unknown> {
-  toBeCssModule(string): R
-  toBePugCssModule(string): R
+  toBeCssModule(string): Promise<R>
+  toBePugCssModule(string): Promise<R>
 }
 
 declare module 'vitest' {
