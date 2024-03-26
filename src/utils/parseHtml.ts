@@ -1,5 +1,5 @@
 import type { AttributeNode, DirectiveNode, TemplateChildNode } from '@vue/compiler-core'
-import MagicString from 'magic-string'
+import { MagicString } from 'vue/compiler-sfc'
 import {
   trimString,
   isObjectExp,
