@@ -20,7 +20,7 @@ Before using it, you might have written something like:
 </style>
 ```
 
-**After using it, you no longer need to repeat the `$style.`, you just need to write this:**  
+**After using it, you no longer need to repeat the `$style.`, you just need to write this:**
 
 In the Vue default template
 
@@ -35,7 +35,7 @@ In the Vue default template
 </style>
 ```
 
-In the Pug template  
+In the Pug template
 
 ```html
 <template lang="pug">
@@ -63,7 +63,7 @@ npm i --save-dev vite-plugin-vue-css-module
 ## Usage
 
 First, add the configuration in the `vite.config.js` file
- 
+
 ```js
 // vite.config.js
 import vueCssModule from 'vite-plugin-vue-css-module'
@@ -71,14 +71,14 @@ export default defineConfig({
   plugins: [
     vueCssModule({
       // By default, it is "cls", but you can change it to another name. However, it is better to use a unique name.
-      attrName: 'cls' 
-    }), 
+      attrName: 'cls'
+    }),
     vue()
   ],
 })
 ```
 
-Then, use it in the `**.vue` file. 
+Then, use it in the `**.vue` file.
 - Add 'module' to the style tag to enable [css-module](https://cn.vuejs.org/api/sfc-css-features.html#css-modules)
 - In the template, use the 'attrName' value you set (the default is 'cls' ) to write the class name
 
@@ -114,16 +114,16 @@ Then, use it in the `**.vue` file.
 
 In addition, if you are using the pug template, the writing method is exactly the same.
 
-> Note:  
+> Note:
 > - This syntax sugar is currently only supported in `<template>` or `<template lang="pug">`.
-> - The plugin will only find the first style tag that uses module and then use its name, which defaults to $style. In fact, setting a custom name such as `<style module="moduleName">` does not make sense for this plugin. 
+> - The plugin will only find the first style tag that uses module and then use its name, which defaults to $style. In fact, setting a custom name such as `<style module="moduleName">` does not make sense for this plugin.
 > - The plugin supports a variety of class name writing, although the writing is not very standardized.
 
 ### Pug class literals
 
 In pug templates, it's possible to convert class literals to module classes.
 
-To enable that, set `pugClassLiterals: true` in plugin options:  
+To enable that, set `pugClassLiterals: true` in plugin options:
 
 When you set it to `true`, the class name priority is as follows: `class` < `:class` < `class literals` < `cls` < `:cls`
 
@@ -135,7 +135,7 @@ export default defineConfig({
     vueCssModule({
       // Disabled by default.
       pugClassLiterals: true
-    }), 
+    }),
     vue()
   ],
 })
