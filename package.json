@@ -74,10 +74,9 @@
     "vue": ">= 3.2.13"
   },
   "optionalDependencies": {
-    "pug-code-gen": "^2.0.3",
     "pug-lexer": "^5.0.1",
     "pug-parser": "^6.0.0",
-    "pug-runtime": "^3.0.1",
+    "pug-source-gen": "^0.0.2",
     "pug-walk": "^2.0.0"
   }
 }

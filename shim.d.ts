@@ -1,19 +1,25 @@
-declare module 'pug-parser' {
-  export function parse(source: string): any
+// Stub types for sanity type checks.
+
+type PugTokens = {
+  __tokens?: true
+}
+
+type PugAst = {
+  __ast?: true
 }
 
 declare module 'pug-lexer' {
-  export function lexer(source: string): any
+  export default function lexer(source: string): PugTokens
+}
+
+declare module 'pug-parser' {
+  export default function parse(source: PugTokens): PugAst
+}
+
+declare module 'pug-source-gen' {
+  export default function generate(ast: PugAst): string
 }
 
 declare module 'pug-walk' {
-  export function walk(ast: any, fn: (node: any) => void): void
-}
-
-declare module 'pug-runtime/wrap.js' {
-  export function wrap(source: string): any
-}
-
-declare module 'pug-code-gen' {
-  export function generate(ast: any): any
+  export default function walk(ast: PugAst, fn: (node: any) => void): void
 }

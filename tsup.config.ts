@@ -8,10 +8,10 @@ export default defineConfig({
   clean: true,
   // Remove those once https://github.com/egoist/tsup/issues/1099 is fixed.
   external: [
-    'pug-code-gen',
     'pug-lexer',
     'pug-parser',
     'pug-runtime',
+    'pug-source-gen',
     'pug-walk',
   ],
 })
