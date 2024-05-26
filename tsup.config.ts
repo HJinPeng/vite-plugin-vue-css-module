@@ -6,5 +6,5 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ['vite', 'vue', 'pug-parser', 'pug-lexer', 'pug-walk', 'pug-runtime/wrap.js', 'pug-code-gen', 'vue/compiler-sfc', 'magic-string']
+  external: ['vite', 'vue', 'pug-parser', 'pug-lexer', 'pug-walk', 'pug-runtime/wrap.js', 'pug-code-gen', 'vue/compiler-sfc']
 })
