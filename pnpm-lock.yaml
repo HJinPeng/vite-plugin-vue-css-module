@@ -25,6 +25,9 @@ optionalDependencies:
   pug-source-gen:
     specifier: ^0.0.2
     version: 0.0.2
+  pug-runtime:
+    specifier: ^3.0.1
+    version: 3.0.1
   pug-walk:
     specifier: ^2.0.0
     version: 2.0.0
@@ -2149,6 +2152,7 @@ packages:
 
   /pug-walk@0.0.3:
     resolution: {integrity: sha512-A0pkTa4/rA74sePQMNAnt9GKixaulVRKt9c4bDk86VVY2/dfVaGMWgeFTADZFhttHlqeK+CJu1347QCNKB+iEA==}
+
     requiresBuild: true
     dev: false
     optional: true
@@ -2679,7 +2683,6 @@ packages:
       siginfo: 2.0.0
       stackback: 0.0.2
     dev: true
-
   /wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}

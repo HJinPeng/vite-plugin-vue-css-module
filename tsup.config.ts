@@ -5,7 +5,7 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   sourcemap: true,
   dts: true,
-  clean: true,
+  clean: true
   // Remove those once https://github.com/egoist/tsup/issues/1099 is fixed.
   external: [
     'pug-lexer',

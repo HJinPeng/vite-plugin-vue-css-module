@@ -12,6 +12,7 @@ describe('pug string', async () => {
   test('multiple module classes and multiple normal classes', async () => {
     await expect(`div(class="red yellow" cls="green red")`).toBePugCssModule(
       `div(class!="red yellow" ':class'!="[$style['green'], $style['red']]")`
+
     )
   })
   test('normal classes, module classes and bind classes: class < :class < cls', async () => {
