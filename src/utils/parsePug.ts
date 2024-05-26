@@ -25,12 +25,14 @@ interface Node {
 }
 
 // pug包，用于动态导入，避免不是用pug模板的项目报错
-let pugPackage: {
-  parse: typeof import('pug-parser').default
-  lexer: typeof import('pug-lexer').default
-  walk: typeof import('pug-walk').default
-  generate: typeof import('pug-source-gen').default
-} | undefined
+let pugPackage:
+  | {
+      parse: typeof import('pug-parser').default
+      lexer: typeof import('pug-lexer').default
+      walk: typeof import('pug-walk').default
+      generate: typeof import('pug-source-gen').default
+    }
+  | undefined
 
 const setPugPackage = async () => {
   pugPackage = {
