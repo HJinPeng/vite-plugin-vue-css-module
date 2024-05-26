@@ -53,9 +53,8 @@ export function removeBlank(code: string) {
  * @param module
  * @returns
  */
-export function removeNonCoreCode(code: string, module?: string) {
-  let style = assembleStyle(module)
-  return removeBlank(
-    code.replace(/<template.*?><div /, '').replace('></div></template>' + style, '')
-  )
+export function getTemplateCode(code: string) {
+  // For HTML templates, return the template div attributes (for historical reasons)
+  // For Pug templates, return the full template
+  return code.replace(/.*<template.*?>(?:<div )?(.*?)(?:><\/div>)?<\/template>.*/, '$1')
 }
